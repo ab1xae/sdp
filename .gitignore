@@ -14,3 +14,7 @@ target/
 
 # OS
 .DS_Store
+
+# IntelliJ IDEA project files
+*.iml
+out/
