@@ -48,35 +48,29 @@ public final class Main {
         System.out.println("Validation");
         System.out.println(SECTION);
 
-        reportFailure(Main::buildPackageWithoutHotel);
-        reportFailure(Main::buildItineraryWithImpossibleRating);
-        reportFailure(Main::buildPackageWithActivityOutsideTheStay);
-    }
-
-    private static void buildPackageWithoutHotel() {
-        new TravelPackageObjectBuilder()
-                .destination("Almaty, Kazakhstan")
-                .nights(2)
-                .getResult();
-    }
-
-    private static void buildItineraryWithImpossibleRating() {
-        new ItineraryBuilder().hotel("Grand Hotel", 9);
-    }
-
-    private static void buildPackageWithActivityOutsideTheStay() {
-        new TravelPackageObjectBuilder()
-                .destination("Astana, Kazakhstan")
-                .hotel("Expo Hotel", 4)
-                .nights(2)
-                .addActivity(10, "Day trip to Borovoe")
-                .getResult();
-    }
-
-    private static void reportFailure(Runnable invalidConstruction) {
         try {
-            invalidConstruction.run();
-        } catch (IllegalArgumentException | IllegalStateException e) {
+            new TravelPackageObjectBuilder()
+                    .destination("Almaty, Kazakhstan")
+                    .nights(2)
+                    .getResult();
+        } catch (IllegalStateException e) {
+            System.out.println("Caught: " + e.getMessage());
+        }
+
+        try {
+            new ItineraryBuilder().hotel("Grand Hotel", 9);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Caught: " + e.getMessage());
+        }
+
+        try {
+            new TravelPackageObjectBuilder()
+                    .destination("Astana, Kazakhstan")
+                    .hotel("Expo Hotel", 4)
+                    .nights(2)
+                    .addActivity(10, "Day trip to Borovoe")
+                    .getResult();
+        } catch (IllegalStateException e) {
             System.out.println("Caught: " + e.getMessage());
         }
     }

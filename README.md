@@ -1,20 +1,12 @@
-# Assignment 1 — Builder Pattern
+# Builder Pattern
 
-Builder design pattern in Java. Product: **Travel Package**.
+Builder design pattern in Java. Product: Travel Package
 
-The same construction steps produce two different representations:
+The same construction steps produce two different results:
 
 1. an immutable `TravelPackage` object
-2. a printable text itinerary (`String`)
+2. a text itinerary (`String`)
 
-## Run
-
-Requires JDK 17+. No dependencies.
-
-```bash
-javac -d out $(find src -name "*.java")
-java -cp out com.example.travel.Main
-```
 
 ## Classes
 
@@ -25,9 +17,6 @@ java -cp out com.example.travel.Main
 | Concrete builders | `TravelPackageObjectBuilder`, `ItineraryBuilder` |
 | Director | `TravelAgencyDirector` |
 | Client | `Main` |
-
-`Hotel`, `Activity`, `MealPlan`, `TransportType`, `BuildStep`, `PackageLimits`,
-`Preconditions` and `IncompletePackageException` are supporting types.
 
 ## Output
 
@@ -44,5 +33,3 @@ Programme:
   day 5 - Spa and hammam afternoon
 ============================
 ```
-
-Full run is in `sample-output.txt`.

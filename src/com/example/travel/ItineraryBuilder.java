@@ -1,7 +1,5 @@
 package com.example.travel;
 
-import java.util.EnumSet;
-
 public class ItineraryBuilder implements TravelPackageBuilder {
     private static final String LINE_END = System.lineSeparator();
     private static final String HEADER = "===== TRAVEL ITINERARY =====";
@@ -16,13 +14,18 @@ public class ItineraryBuilder implements TravelPackageBuilder {
     private static final String MEAL_PLAN_LINE = "Meal plan   : %s";
     private static final String ACTIVITY_LINE = "  day %d - %s";
 
-    private final EnumSet<BuildStep> completedSteps = EnumSet.noneOf(BuildStep.class);
+    private boolean hasDestination;
+    private boolean hasHotel;
+    private boolean hasNights;
+
     private StringBuilder header = new StringBuilder();
     private StringBuilder programme = new StringBuilder();
 
     @Override
     public ItineraryBuilder reset() {
-        completedSteps.clear();
+        hasDestination = false;
+        hasHotel = false;
+        hasNights = false;
         header = new StringBuilder();
         programme = new StringBuilder();
         return this;
@@ -32,14 +35,14 @@ public class ItineraryBuilder implements TravelPackageBuilder {
     public ItineraryBuilder destination(String destination) {
         String safeDestination = Preconditions.requireText(destination, "destination");
         appendHeaderLine(DESTINATION_LINE, safeDestination);
-        completedSteps.add(BuildStep.DESTINATION);
+        hasDestination = true;
         return this;
     }
 
     @Override
     public ItineraryBuilder hotel(String name, int stars) {
-        appendHeaderLine(HOTEL_LINE, Hotel.of(name, stars));
-        completedSteps.add(BuildStep.HOTEL);
+        appendHeaderLine(HOTEL_LINE, new Hotel(name, stars));
+        hasHotel = true;
         return this;
     }
 
@@ -48,7 +51,7 @@ public class ItineraryBuilder implements TravelPackageBuilder {
         appendHeaderLine(NIGHTS_LINE,
                 Preconditions.requireInRange(nights, PackageLimits.MIN_NIGHTS,
                         PackageLimits.MAX_NIGHTS, "nights"));
-        completedSteps.add(BuildStep.NIGHTS);
+        hasNights = true;
         return this;
     }
 
@@ -76,16 +79,21 @@ public class ItineraryBuilder implements TravelPackageBuilder {
 
     @Override
     public ItineraryBuilder addActivity(int day, String description) {
-        Activity activity = Activity.of(day, description);
+        Activity activity = new Activity(day, description);
         programme.append(String.format(ACTIVITY_LINE, activity.getDay(), activity.getDescription()))
                 .append(LINE_END);
         return this;
     }
 
     public String getResult() {
-        EnumSet<BuildStep> missingSteps = EnumSet.complementOf(completedSteps);
-        if (!missingSteps.isEmpty()) {
-            throw new IncompletePackageException(missingSteps);
+        if (!hasDestination) {
+            throw new IllegalStateException("Cannot build the itinerary: destination is missing");
+        }
+        if (!hasHotel) {
+            throw new IllegalStateException("Cannot build the itinerary: hotel is missing");
+        }
+        if (!hasNights) {
+            throw new IllegalStateException("Cannot build the itinerary: nights is missing");
         }
         StringBuilder itinerary = new StringBuilder()
                 .append(HEADER).append(LINE_END)

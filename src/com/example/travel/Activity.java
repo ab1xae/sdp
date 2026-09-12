@@ -4,16 +4,10 @@ public final class Activity {
     private final int day;
     private final String description;
 
-    private Activity(int day, String description) {
-        this.day = day;
-        this.description = description;
-    }
-
-    public static Activity of(int day, String description) {
-        return new Activity(
-                Preconditions.requireInRange(day, PackageLimits.FIRST_DAY,
-                        PackageLimits.MAX_DAY, "day"),
-                Preconditions.requireText(description, "description"));
+    public Activity(int day, String description) {
+        this.day = Preconditions.requireInRange(day, PackageLimits.FIRST_DAY,
+                PackageLimits.MAX_DAY, "day");
+        this.description = Preconditions.requireText(description, "description");
     }
 
     public int getDay() {

@@ -1,14 +1,12 @@
 package com.example.travel;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 public class TravelPackageObjectBuilder implements TravelPackageBuilder {
     private static final TransportType DEFAULT_TRANSPORT = TransportType.FLIGHT;
     private static final MealPlan DEFAULT_MEAL_PLAN = MealPlan.BED_AND_BREAKFAST;
 
-    private final EnumSet<BuildStep> completedSteps = EnumSet.noneOf(BuildStep.class);
     private List<Activity> activities = new ArrayList<>();
 
     private String destination;
@@ -20,7 +18,6 @@ public class TravelPackageObjectBuilder implements TravelPackageBuilder {
 
     @Override
     public TravelPackageObjectBuilder reset() {
-        completedSteps.clear();
         activities = new ArrayList<>();
         destination = null;
         hotel = null;
@@ -34,14 +31,12 @@ public class TravelPackageObjectBuilder implements TravelPackageBuilder {
     @Override
     public TravelPackageObjectBuilder destination(String destination) {
         this.destination = Preconditions.requireText(destination, "destination");
-        completedSteps.add(BuildStep.DESTINATION);
         return this;
     }
 
     @Override
     public TravelPackageObjectBuilder hotel(String name, int stars) {
-        this.hotel = Hotel.of(name, stars);
-        completedSteps.add(BuildStep.HOTEL);
+        this.hotel = new Hotel(name, stars);
         return this;
     }
 
@@ -49,7 +44,6 @@ public class TravelPackageObjectBuilder implements TravelPackageBuilder {
     public TravelPackageObjectBuilder nights(int nights) {
         this.nights = Preconditions.requireInRange(nights, PackageLimits.MIN_NIGHTS,
                 PackageLimits.MAX_NIGHTS, "nights");
-        completedSteps.add(BuildStep.NIGHTS);
         return this;
     }
 
@@ -75,14 +69,19 @@ public class TravelPackageObjectBuilder implements TravelPackageBuilder {
 
     @Override
     public TravelPackageObjectBuilder addActivity(int day, String description) {
-        activities.add(Activity.of(day, description));
+        activities.add(new Activity(day, description));
         return this;
     }
 
     public TravelPackage getResult() {
-        EnumSet<BuildStep> missingSteps = EnumSet.complementOf(completedSteps);
-        if (!missingSteps.isEmpty()) {
-            throw new IncompletePackageException(missingSteps);
+        if (destination == null) {
+            throw new IllegalStateException("Cannot build the package: destination is missing");
+        }
+        if (hotel == null) {
+            throw new IllegalStateException("Cannot build the package: hotel is missing");
+        }
+        if (nights == 0) {
+            throw new IllegalStateException("Cannot build the package: nights is missing");
         }
         verifyActivitiesFitTheStay();
         return new TravelPackage(destination, hotel, nights, travellers,
